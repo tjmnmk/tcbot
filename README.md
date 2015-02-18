@@ -5,11 +5,9 @@ Tcbot is IRC to WoW Channel bridge bot.
 
 Installation
 ============
-1. Install [tclib](https://pypi.python.org/pypi/irc)
-https://github.com/meggie-true/tclib[web chat](https://github.com/meggie-true/tclib)
-
-2. Install python irc library
-
+1. Install [tclib](https://github.com/meggie-true/tclib)
+2. Install python [irc](https://pypi.python.org/pypi/irc) library
+    
     pip install irc
 
 3. Clone tcbot
@@ -28,7 +26,7 @@ https://github.com/meggie-true/tclib[web chat](https://github.com/meggie-true/tc
 Dependecies
 ===========
 * python2
-* python [tclib](https://pypi.python.org/pypi/irc) library
+* python [irc](https://pypi.python.org/pypi/irc) library
 * tclib
 
 Commands
