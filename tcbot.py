@@ -21,8 +21,11 @@ import tclib
 
 import config
 
-class IrcBot(irc.bot.SingleServerIRCBot):
+start = True
+
+class IrcBot(threading.Thread, irc.bot.SingleServerIRCBot):
     def __init__(self):
+        threading.Thread.__init__(self)
         irc.bot.SingleServerIRCBot.__init__(self, [(config.irc_server, config.irc_port)],
                                             config.irc_nickname,
                                             config.irc_nickname)
@@ -31,6 +34,9 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         self._tcw = TCWorker(self)
         self._tcw.start()
         
+    def run(self):
+        irc.bot.SingleServerIRCBot.start(self)
+                
     def on_welcome(self, control, event):
         control.join(self._channel)
         
@@ -50,13 +56,21 @@ class IrcBot(irc.bot.SingleServerIRCBot):
         user = event.source.split("!")[0]
         
         if msg.startswith(config.irc_command_prefix):
-            self._do_command(msg)
+            msg = msg.replace(config.irc_command_prefix, "", 1)
+            self._do_command(user, msg)
         else:
             self._tcw.send_msg(user, msg)
             
     def send_msg(self, user, msg):
         self.connection.privmsg(self._channel, msg)
         
+    def _do_command(self, user, msg):
+        global start
+        
+        if msg == "restart" and user in config.irc_owners:
+            self._tcw.die()
+            start = True
+            self.die()
     
 class TCWorker(threading.Thread):
     def __init__(self, ircbot):
@@ -81,6 +95,7 @@ class TCWorker(threading.Thread):
         self._world = None
         self._connected = False
         self._con_lock = threading.RLock()
+        self._die = False
         
     def run(self):
         while True:
@@ -95,7 +110,13 @@ class TCWorker(threading.Thread):
                     self._log_status()
             else:
                 self.connect()
+            if self._die:
+                break
             time.sleep(1)
+            
+    def die(self):
+        self.disconnect()
+        self._die = True
                   
     def connect(self):
         with self._con_lock:
@@ -198,6 +219,10 @@ class TCWorker(threading.Thread):
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
-    bot = IrcBot()
-    bot.start()
+    
+    while start == True:
+        start = False
+        bot = IrcBot()
+        bot.start()
+        bot.join()
     

@@ -6,6 +6,7 @@ irc_nickname = "foo"
 irc_autorejoin = True
 irc_channel = "#foo"
 irc_command_prefix = "!"
+irc_owners = ["foo", "boo"]
 
 tc_realmserver = "example.com"
 tc_realmport = 3724
