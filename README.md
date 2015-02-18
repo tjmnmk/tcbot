@@ -12,7 +12,8 @@ Installation
 
 3. Clone tcbot
 
-    https://github.com/meggie-true/tcbot
+    git clone https://github.com/meggie-true/tcbot
+    
     cd tcbot
     
 4. Configure tcbot
