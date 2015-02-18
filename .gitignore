@@ -1,0 +1,8 @@
+*.pyc
+.pydevproject
+.project
+doc/
+.settings/
+test.py
+build/
+tclib/
