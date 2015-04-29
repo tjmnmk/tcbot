@@ -13,10 +13,8 @@ this stuff is worth it, you can buy me a beer in return Adam Bambuch
 import sys
 import random
 import logging
-import math
 import threading
 import time
-import re
 
 import irc.bot
 import tclib
