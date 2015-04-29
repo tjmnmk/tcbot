@@ -205,8 +205,11 @@ class TCWorker(threading.Thread):
         logging.warning("TC: %s", self._status)
         
     def _handle_message_chat(self, opcode, msg_type, data):
+        print data
         if opcode not in (tclib.const.SMSG_MESSAGECHAT,
                           tclib.const.SMSG_GM_MESSAGECHAT):
+            return
+        if msg_type != tclib.const.CHAT_MSG_CHANNEL:
             return
         if data["channel"].lower() != self._channel.lower():
             return
