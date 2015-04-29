@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -15,6 +16,7 @@ import logging
 import math
 import threading
 import time
+import re
 
 import irc.bot
 import tclib
@@ -169,6 +171,14 @@ class TCWorker(threading.Thread):
                 w.disconnect()
                 return False
             
+            try:
+                w.wait_when_login_complete()
+            except (tclib.exceptions.TimeoutError, tclib.exceptions.StreamBrokenError) as e:
+                self._status = "Unable to connect to World Server; Reconnecting"
+                self._log_status()
+                logging.debug("%s - %s", type(e), str(e))
+                w.disconnect()
+                return False
             w.send_join_channel(self._channel)
             w.callback.register(tclib.const.SMSG_MESSAGECHAT, self._handle_message_chat)
             w.callback.register(tclib.const.SMSG_GM_MESSAGECHAT, self._handle_message_chat)
@@ -184,11 +194,18 @@ class TCWorker(threading.Thread):
             if not self._connected:
                 return
             
-            for i in range(int(math.ceil(len(msg) / 200.0))):
-                send = str(user + ": " + msg[i*255:(i+1)*255])
+            msg = msg.encode("utf-8")
+            user = user.encode("utf-8")
+            send = str("%s: %s" % (user, msg))
+            while 1:
+                chunk = send[:200]
+                send = send[200:]
+                if not chunk:
+                    break
                 self._world.send_message_chat(tclib.const.CHAT_MSG_CHANNEL,
-                                              send,
+                                              chunk,
                                               self._channel)
+                time.sleep(0.1)
             
     def disconnect(self):
         with self._con_lock:
@@ -205,7 +222,6 @@ class TCWorker(threading.Thread):
         logging.warning("TC: %s", self._status)
         
     def _handle_message_chat(self, opcode, msg_type, data):
-        print data
         if opcode not in (tclib.const.SMSG_MESSAGECHAT,
                           tclib.const.SMSG_GM_MESSAGECHAT):
             return
@@ -216,8 +232,12 @@ class TCWorker(threading.Thread):
         
         user = data["source"].name
         msg = data["msg"]
+        if user.lower() == self._character.lower():
+            return
         
-        self._ircbot.send_msg(user, msg)
+        user = user.decode("utf-8")
+        msg = msg.decode("utf-8")
+        self._ircbot.send_msg(user, "%s: %s" % (user, msg))
         
 
 if __name__ == '__main__':
