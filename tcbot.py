@@ -189,7 +189,7 @@ class TCWorker(threading.Thread):
             return True
     
     def _remove_item_link(self, msg):
-        return re.sub(r'\|(?:.*?)\|Hitem:(?:.*?)\|.\[([^\]]+)\]\|.\|.',
+        return re.sub(r'\|(?:.*?)\|Hitem:(?:.*?)\|.\[([^\]]+)(?:\]\|.\|.)?',
                 r'[\1]',
                 msg)
 
