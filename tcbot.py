@@ -15,6 +15,7 @@ import random
 import logging
 import threading
 import time
+import re
 
 import irc.bot
 import tclib
@@ -187,6 +188,12 @@ class TCWorker(threading.Thread):
             
             return True
     
+    def _remove_item_link(self, msg):
+        msg = re.sub(r'\|(?:.*?)\|Hitem:(?:.*?)\|.\[([^\]]+)(?:\]\|.\|.)?',
+                r'[\1]',
+                msg)
+        return msg.replace('|','')
+
     def send_msg(self, user, msg):
         with self._con_lock:
             if not self._connected:
@@ -194,6 +201,9 @@ class TCWorker(threading.Thread):
             
             msg = msg.encode("utf-8")
             user = user.encode("utf-8")
+
+            msg = self._remove_item_link(msg)
+
             send = str("%s: %s" % (user, msg))
             while 1:
                 chunk = send[:200]
@@ -235,8 +245,10 @@ class TCWorker(threading.Thread):
         
         user = user.decode("utf-8")
         msg = msg.decode("utf-8")
+
+        msg = self._remove_item_link(msg)
+
         self._ircbot.send_msg(user, "%s: %s" % (user, msg))
-        
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING)
