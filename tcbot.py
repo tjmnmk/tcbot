@@ -189,9 +189,10 @@ class TCWorker(threading.Thread):
             return True
     
     def _remove_item_link(self, msg):
-        return re.sub(r'\|(?:.*?)\|Hitem:(?:.*?)\|.\[([^\]]+)(?:\]\|.\|.)?',
+        msg = re.sub(r'\|(?:.*?)\|Hitem:(?:.*?)\|.\[([^\]]+)(?:\]\|.\|.)?',
                 r'[\1]',
                 msg)
+        return msg.replace('|','')
 
     def send_msg(self, user, msg):
         with self._con_lock:
