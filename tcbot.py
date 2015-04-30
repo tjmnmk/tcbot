@@ -192,7 +192,10 @@ class TCWorker(threading.Thread):
         msg = re.sub(r'\|(?:.*?)\|Hitem:(?:.*?)\|.\[([^\]]+)(?:\]\|.\|.)?',
                 r'[\1]',
                 msg)
-        return msg.replace('|','')
+        msg = msg.replace("||", "\0\0")
+        msg = msg.replace("|", "")
+        msg = msg.replace("\0\0", "||")
+        return msg
 
     def send_msg(self, user, msg):
         with self._con_lock:
